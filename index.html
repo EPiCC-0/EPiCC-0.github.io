@@ -1,0 +1,990 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suday Naidu — 3D Animator & Game Designer</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --card: #15151f;
+    --border: #2a2a3a;
+    --accent: #e8c97a;
+    --accent2: #7a8fe8;
+    --text: #e8e4d9;
+    --muted: #7a7a8a;
+    --red: #e87a7a;
+  }
+
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    overflow-x: hidden;
+  }
+
+  /* Noise texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.2rem 4rem;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.4rem;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding: 8rem 4rem 4rem;
+    overflow: hidden;
+  }
+
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(232,201,122,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(232,201,122,0.04) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 100%);
+  }
+
+  .hero-glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(122,143,232,0.08) 0%, transparent 70%);
+    top: 50%; left: 60%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .hero-content { position: relative; max-width: 900px; }
+
+  .hero-tag {
+    display: inline-block;
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent);
+    border: 1px solid rgba(232,201,122,0.3);
+    padding: 0.4rem 1rem;
+    margin-bottom: 2rem;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .hero-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(5rem, 13vw, 11rem);
+    line-height: 0.9;
+    letter-spacing: 0.02em;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .hero-name span { color: var(--accent); }
+
+  .hero-sub {
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: clamp(1.2rem, 2.5vw, 1.8rem);
+    color: var(--muted);
+    margin-top: 1rem;
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  .hero-bio {
+    max-width: 520px;
+    font-size: 0.8rem;
+    line-height: 1.9;
+    color: var(--muted);
+    margin-top: 2rem;
+    animation: fadeUp 0.8s 0.3s ease both;
+  }
+
+  .hero-cta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2.5rem;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+
+  .btn-primary {
+    display: inline-block;
+    padding: 0.9rem 2rem;
+    background: var(--accent);
+    color: var(--bg);
+    text-decoration: none;
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--text);
+    transform: translateY(-2px);
+  }
+
+  .btn-ghost {
+    display: inline-block;
+    padding: 0.9rem 2rem;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: translateY(-2px);
+  }
+
+  .hero-stats {
+    display: flex;
+    gap: 3rem;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+    animation: fadeUp 0.8s 0.5s ease both;
+  }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 0.3rem;
+  }
+
+  /* SECTION COMMON */
+  section {
+    padding: 6rem 4rem;
+    position: relative;
+  }
+
+  .section-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.8rem;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    letter-spacing: 0.05em;
+    margin-bottom: 3rem;
+  }
+
+  /* ABOUT */
+  #about {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5rem;
+    align-items: start;
+  }
+
+  .about-text p {
+    font-size: 0.85rem;
+    line-height: 2;
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+  }
+
+  .skills-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .skill-group-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 0.1em;
+    color: var(--accent);
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    grid-column: 1 / -1;
+  }
+
+  .skill-tag {
+    display: inline-block;
+    padding: 0.4rem 0.9rem;
+    background: var(--card);
+    border: 1px solid var(--border);
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0.25rem;
+    transition: all 0.2s;
+  }
+
+  .skill-tag:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* EDUCATION & EXPERIENCE */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 2.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -2.5rem;
+    top: 0.35rem;
+    width: 8px;
+    height: 8px;
+    background: var(--accent);
+  }
+
+  .timeline-year {
+    font-size: 0.6rem;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .timeline-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.2rem;
+  }
+
+  .timeline-sub {
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+
+  /* ANIMATION GALLERY */
+  #animation {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+  }
+
+  .gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .anim-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    position: relative;
+  }
+
+  .anim-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(232,201,122,0.4);
+  }
+
+  .anim-link {
+    display: inline-block;
+    margin-top: 1rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid rgba(232,201,122,0.3);
+    padding: 0.5rem 1rem;
+    transition: all 0.2s;
+  }
+
+  .anim-link:hover {
+    background: rgba(232,201,122,0.08);
+    border-color: var(--accent);
+  }
+
+  .anim-card-body { padding: 1.5rem; }
+
+  .anim-card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.7rem;
+  }
+
+  .anim-card-desc {
+    font-size: 0.72rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1rem;
+  }
+
+  .learnings-toggle {
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: inherit;
+    transition: opacity 0.2s;
+  }
+
+  .learnings-toggle:hover { opacity: 0.7; }
+
+  .learnings-list {
+    display: none;
+    margin-top: 0.8rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--border);
+    list-style: none;
+  }
+
+  .learnings-list.open { display: block; }
+
+  .learnings-list li {
+    font-size: 0.68rem;
+    color: var(--muted);
+    padding: 0.3rem 0;
+    padding-left: 1rem;
+    position: relative;
+  }
+
+  .learnings-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--accent2);
+  }
+
+  /* GAME DESIGN PROJECTS */
+  #projects {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+  }
+
+  .projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 1.5rem;
+  }
+
+  .project-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 2rem;
+    transition: transform 0.3s, border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+    display: block;
+    color: inherit;
+  }
+
+  .project-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+  }
+
+  .project-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(232,201,122,0.3);
+  }
+
+  .project-card:hover::before { transform: scaleX(1); }
+
+  .project-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    color: rgba(232,201,122,0.08);
+    line-height: 1;
+    margin-bottom: 0.5rem;
+  }
+
+  .project-type {
+    font-size: 0.58rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--accent2);
+    margin-bottom: 0.8rem;
+  }
+
+  .project-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.3;
+    margin-bottom: 0.8rem;
+  }
+
+  .project-desc {
+    font-size: 0.7rem;
+    color: var(--muted);
+    line-height: 1.8;
+    margin-bottom: 1.5rem;
+  }
+
+  .project-link-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    text-decoration: none;
+    background: none;
+    border: 1px solid rgba(232,201,122,0.3);
+    padding: 0.5rem 1rem;
+    font-family: 'DM Mono', monospace;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .project-link-label:hover {
+    background: rgba(232,201,122,0.08);
+    border-color: var(--accent);
+    gap: 0.8rem;
+  }
+
+  .project-link-label::after { content: '→'; }
+
+  /* CONTACT */
+  #contact {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    text-align: center;
+  }
+
+  .contact-email {
+    display: inline-block;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(2rem, 6vw, 5rem);
+    letter-spacing: 0.05em;
+    color: var(--text);
+    text-decoration: none;
+    transition: color 0.2s;
+    margin: 1.5rem 0 3rem;
+  }
+
+  .contact-email:hover { color: var(--accent); }
+
+  .contact-details {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+  }
+
+  .contact-item {
+    font-size: 0.7rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .contact-item a {
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .contact-item a:hover { color: var(--accent); }
+
+  /* FOOTER */
+  footer {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 1.5rem 4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  footer a {
+    color: var(--accent);
+    text-decoration: none;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .fade-up {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .fade-up.hidden {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+
+  /* DIVIDER */
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 3rem;
+  }
+
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 768px) {
+    nav { padding: 1rem 1.5rem; }
+    .nav-links { gap: 1.5rem; }
+    section { padding: 4rem 1.5rem; }
+    .hero { padding: 7rem 1.5rem 3rem; }
+    .about-grid { grid-template-columns: 1fr; gap: 3rem; }
+    .hero-stats { gap: 1.5rem; flex-wrap: wrap; }
+    footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">S.NAIDU</a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#projects">Game Design</a></li>
+    <li><a href="#animation">Animation</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-grid-bg"></div>
+  <div class="hero-glow"></div>
+  <div class="hero-content">
+    <div class="hero-tag">3D Animator · Game Designer · Rigger</div>
+    <h1 class="hero-name">SUDAY<br><span>NAIDU</span></h1>
+    <p class="hero-sub">Bringing characters and worlds to life</p>
+    <p class="hero-bio">A passionate 3D animator and rigger with hands-on experience at BLACKSHEEEP and WORK AND WORK. Skilled in Maya—from character animation and rigging to prop work and facial blendshapes. Also exploring game design through research-driven projects in player psychology, F2P mechanics, and UX.</p>
+    <div class="hero-cta">
+      <a href="#animation" class="btn-primary">View Animation Work</a>
+      <a href="#projects" class="btn-ghost">Game Design Projects</a>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-num">3+</div>
+        <div class="stat-label">Years of Study</div>
+      </div>
+      <div>
+        <div class="stat-num">7</div>
+        <div class="stat-label">Animations</div>
+      </div>
+      <div>
+        <div class="stat-num">6</div>
+        <div class="stat-label">Design Projects</div>
+      </div>
+      <div>
+        <div class="stat-num">2</div>
+        <div class="stat-label">Industry Stints</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="about-grid">
+    <div class="about-text fade-up">
+      <div class="section-label">About Me</div>
+      <h2 class="section-title">Animator<br>& Creator</h2>
+      <p>I'm a passionate 3D animator exploring the art of bringing characters and worlds to life through motion. Currently honing my skills in Maya, I enjoy animating characters, experimenting with physics-based motion, and studying the principles of animation.</p>
+      <p>My industry experience at BLACKSHEEEP and WORK AND WORK gave me real-world insight into character animation, rigging, and prop work in a fast-paced startup environment. Open to feedback, collaboration, and new opportunities to grow.</p>
+      <p>Beyond animation, I've been developing a strong foundation in game design — studying player behavior, F2P economics, core gameplay loops, and UX-centric design thinking.</p>
+
+      <div style="margin-top:2rem">
+        <div class="section-label">Contact</div>
+        <p style="font-size:0.75rem; margin-top:0.5rem;">
+          <a href="/cdn-cgi/l/email-protection#fa898f9e9b83949b939e8fcbcaba9d979b9396d4999597" style="color:var(--accent); text-decoration:none;"><span class="__cf_email__" data-cfemail="14676170756d7a757d70612524547379757d783a777b79">[email&#160;protected]</span></a><br>
+          <span style="color:var(--muted);">+91 7977286526</span><br>
+          <span style="color:var(--muted);">Raheja Complex, Malad, Mumbai</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="fade-up">
+      <div class="skills-grid" style="margin-bottom:3rem">
+        <div class="skill-group-title" style="grid-column:1/-1">Technical Skills</div>
+        <div>
+          <p style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;">Hard Skills</p>
+          <span class="skill-tag">3D Character Animation</span>
+          <span class="skill-tag">Prop Animation</span>
+          <span class="skill-tag">Rigging</span>
+          <span class="skill-tag">Lighting & Rendering</span>
+          <span class="skill-tag">BlendShapes</span>
+          <span class="skill-tag">Maya</span>
+        </div>
+        <div>
+          <p style="font-size:0.6rem;letter-spacing:0.15em;text-transform:uppercase;color:var(--muted);margin-bottom:0.8rem;">Soft Skills</p>
+          <span class="skill-tag">Collaboration</span>
+          <span class="skill-tag">Communication</span>
+          <span class="skill-tag">Time Management</span>
+          <span class="skill-tag">Problem Solving</span>
+        </div>
+      </div>
+
+      <div class="section-label">Education & Experience</div>
+      <div class="timeline" style="margin-top:1rem">
+        <div class="timeline-item">
+          <div class="timeline-year">2022 — 2025</div>
+          <div class="timeline-title">Post Secondary Education</div>
+          <div class="timeline-sub">Ajeenkya DY Patil University</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">Work Experience</div>
+          <div class="timeline-title">3D Animator & Rigger</div>
+          <div class="timeline-sub">BLACKSHEEEP — Character animation & rigging</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">Work Experience</div>
+          <div class="timeline-title">3D Animator & Rigger</div>
+          <div class="timeline-sub">WORK AND WORK — Prop rigging & animation</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2021 — 2022</div>
+          <div class="timeline-title">Senior Secondary School</div>
+          <div class="timeline-sub">KV INS HAMLA</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2019 — 2020</div>
+          <div class="timeline-title">Secondary School</div>
+          <div class="timeline-sub">KV INS HAMLA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GAME DESIGN PROJECTS -->
+<section id="projects">
+  <div class="section-label fade-up">Research & Analysis</div>
+  <h2 class="section-title fade-up">Game Design<br>Projects</h2>
+  <p class="fade-up" style="font-size:0.8rem;color:var(--muted);max-width:600px;margin-bottom:3rem;line-height:1.9;">A collection of research-driven game design documents exploring player psychology, monetization mechanics, UX design, and gameplay systems analysis.</p>
+
+  <div class="projects-grid">
+
+    <div class="project-card fade-up">
+      <div class="project-num">01</div>
+      <div class="project-type">Bug Analysis · QA</div>
+      <h3 class="project-title">Dead By Daylight Bug Analysis</h3>
+      <p class="project-desc">An in-depth analysis of bugs, exploits, and design inconsistencies in Dead By Daylight — examining how technical issues affect player experience and game balance.</p>
+      <a class="project-link-label" href="https://drive.google.com/file/d/16_qzptIjfvT1I4VVEwn42HQpr46adDqd/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Document</a>
+    </div>
+
+    <div class="project-card fade-up">
+      <div class="project-num">02</div>
+      <div class="project-type">Business Model · Case Study</div>
+      <h3 class="project-title">F2P Case Study Analysis</h3>
+      <p class="project-desc">A detailed case study examining Free-to-Play business models across multiple titles — revenue strategies, player retention, and the economics of live-service games.</p>
+      <a class="project-link-label" href="https://drive.google.com/file/d/1g8L1aAbDTUcKQ5YzMFuOPc66eia-OL6J/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Document</a>
+    </div>
+
+    <div class="project-card fade-up">
+      <div class="project-num">03</div>
+      <div class="project-type">Game Design · Monetization</div>
+      <h3 class="project-title">F2P Mechanics and Strategies</h3>
+      <p class="project-desc">Exploration of Free-to-Play design mechanics — from battle passes and loot boxes to daily rewards and progression systems that balance fun with monetization.</p>
+      <a class="project-link-label" href="https://drive.google.com/file/d/1Tapvg-da9T9MQ1pWCn1yUfKSmJcXhy0w/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Document</a>
+    </div>
+
+    <div class="project-card fade-up">
+      <div class="project-num">04</div>
+      <div class="project-type">UX Design · Game Feel</div>
+      <h3 class="project-title">Player Centric Design</h3>
+      <p class="project-desc">A study of design principles that place the player experience at the center — accessibility, feedback systems, intuitive UI, and emotional engagement in games.</p>
+      <a class="project-link-label" href="https://drive.google.com/file/d/1BpPrF59tgaPOGwVWSdWJ_0hkPDBvnFHs/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Document</a>
+    </div>
+
+    <div class="project-card fade-up">
+      <div class="project-num">05</div>
+      <div class="project-type">Research · User Research</div>
+      <h3 class="project-title">Player Persona & Journey Report</h3>
+      <p class="project-desc">User research documenting player archetypes, motivational profiles, and player journeys — mapping how different types of players discover, engage, and churn from games.</p>
+      <a class="project-link-label" href="https://drive.google.com/file/d/1u1PJjltF9D55kD6ldZ-pe2kSi5d8v0nJ/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Document</a>
+    </div>
+
+    <div class="project-card fade-up">
+      <div class="project-num">06</div>
+      <div class="project-type">Systems Design · Loops</div>
+      <h3 class="project-title">Core Gameplay Loops</h3>
+      <p class="project-desc">Analysis of core, secondary, and meta gameplay loops across genres — how designers use compulsion loops, reward schedules, and progression to create lasting engagement.</p>
+      <a class="project-link-label" href="https://drive.google.com/file/d/11cS7eUXpMvcm3JAqDLIOLsNf8kXQfSDI/view?usp=sharing" target="_blank" rel="noopener noreferrer">View Document</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ANIMATION GALLERY -->
+<section id="animation">
+  <div class="section-label fade-up">Animation Portfolio</div>
+  <h2 class="section-title fade-up">3D Animation<br>Gallery</h2>
+
+  <div class="gallery-grid">
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">Ball Bounce</h3>
+        <p class="anim-card-desc">A bowling ball and beach ball dropped from the same height — contrasting weight, elasticity, and energy transfer through squash & stretch principles.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>Weight & mass affect motion dynamics</li>
+          <li>Elasticity influences bounce height</li>
+          <li>Squash & stretch add physical realism</li>
+          <li>Timing & spacing convey weight differences</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1L8k2PWATqV12RBoUg2Fp4SxLqFMvQpm8/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">Pendulum Swing</h3>
+        <p class="anim-card-desc">A robotic claw swings between two points following a natural arc, grabs a small box at Point B, and returns — demonstrating momentum, IK/FK constraints, and object interaction.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>Pendulum motion & arc paths in Maya</li>
+          <li>Ease in & ease out for realistic deceleration</li>
+          <li>IK vs FK & constraints for controlled rigs</li>
+          <li>Timing & weight during pick-up interactions</li>
+          <li>Graph editor curve smoothing</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1VD6_TmlnKw9ZfjGiwx3BAiCEOpK07kwU/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">Basic Character Walk</h3>
+        <p class="anim-card-desc">A warrior-like character walks with confident, rhythmic gait — natural arm swing opposition, head bob, weight shifts, and secondary motion on a cape.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>Walk cycle fundamentals: contact, passing, up, down</li>
+          <li>Weight shifting for balanced realism</li>
+          <li>Arm & leg coordination through opposition</li>
+          <li>Posture & personality in warrior stance</li>
+          <li>Secondary motion on cloth and armor</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1HVhROYFxfFeHD1y2FAEcj6n2GGKDGxef/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">Basic Character Run</h3>
+        <p class="anim-card-desc">A 3D warrior character running in a loop with natural weight shifts. A frame-alignment issue in the loop serves as a lesson in proper cycle setup.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>Looping animation: matching first & last frames</li>
+          <li>Pose-to-pose consistency to prevent pops</li>
+          <li>Root motion control against sliding</li>
+          <li>Frame offset timing checks</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1GTUFfModefgoieVEx1CYTUfER3Ropds0/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">Simple Attack Animation</h3>
+        <p class="anim-card-desc">A short samurai performs a 360° spin, sword swing, 180° turn, and back kick. An early Year 1 work acknowledging choppy transitions as a learning milestone.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>Smooth motion flow through refined in-betweens</li>
+          <li>Proper timing & spacing for even frame distribution</li>
+          <li>Follow-through on sword swing for weight</li>
+          <li>Graph editor fixes for stutters and sharp jumps</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1ZVRwpsm5A5UaW835gr2yJ0o2byB8WDRF/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">Chest Prop Animation</h3>
+        <p class="anim-card-desc">A chest trembles with anticipation, shrinks, leaps into the air, and bursts open — sending three coins arcing outward with satisfying secondary motion.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>Anticipation & squash/stretch for dynamic buildup</li>
+          <li>Timing & spacing for snappy satisfying motion</li>
+          <li>Secondary motion follow-through on lid and coins</li>
+          <li>Arc movement: coins pop naturally in curved paths</li>
+          <li>Overlap & bounce with variation in coin landing</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1pwa6lJQUT9zx6hOJlDLfTdetx1scbSmZ/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+    <div class="anim-card fade-up">
+      <div class="anim-card-body">
+        <h3 class="anim-card-title">BlendShapes Work</h3>
+        <p class="anim-card-desc">A skull character uses Maya's BlendShapes to transition between blink, surprise, curiosity, and anger — demonstrating emotional range through shape deformation.</p>
+        <button class="learnings-toggle" onclick="toggleLearnings(this)">+ Key Learnings</button>
+        <ul class="learnings-list">
+          <li>BlendShapes setup and control in Maya</li>
+          <li>Smooth expression transitions without abrupt shifts</li>
+          <li>Timing & exaggeration for expressive animation</li>
+          <li>Conveying emotion on non-human geometry</li>
+        </ul>
+        <a class="anim-link" href="https://drive.google.com/file/d/1dyKkJzF3H5bwMEXXNs_sn1bniQaZLxoG/view?usp=sharing" target="_blank" rel="noopener noreferrer">Watch Animation →</a>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="section-label fade-up">Get In Touch</div>
+  <h2 class="section-title fade-up">Let's Work<br>Together</h2>
+  <a href="mailto:sudaynaidu10@gmail.com" class="contact-email fade-up">sudaynaidu10@gmail.com</a>
+
+  <div class="contact-details fade-up">
+    <div class="contact-item">📞 <a href="tel:+917977286526">+91 7977286526</a></div>
+    <div class="contact-item">📍 Raheja Complex, Malad, Mumbai</div>
+    <div class="contact-item">
+      <a href="https://221a2ffb-a8f9-40eb-9a48-ffca0fb6c99c.filesusr.com/ugd/d8a772_f5c956ead1304d45b2a5f7d26e10d81e.pdf" target="_blank">
+        📄 View Recommendation Letter
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <span>© 2025 Suday Naidu — All rights reserved</span>
+  <span>3D Animator · Rigger · Game Designer · Mumbai</span>
+</footer>
+
+<script>
+  // Toggle learnings
+  function toggleLearnings(btn) {
+    const list = btn.nextElementSibling;
+    list.classList.toggle('open');
+    btn.textContent = list.classList.contains('open') ? '− Key Learnings' : '+ Key Learnings';
+  }
+
+  // Scroll fade-in — elements visible by default, hidden class applied then removed on scroll
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.remove('hidden');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.fade-up').forEach((el) => {
+    el.classList.add('hidden');
+    observer.observe(el);
+  });
+</script>
+</body>
+</html>
